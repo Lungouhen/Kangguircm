@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ \App\Core\Session::get('csrf_token', '') }}">
     <meta name="description" content="{{ $metaDescription ?? 'Multi-Module Platform: CMS, Email Marketing, and HRM management system' }}">
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="/images/favicon.png">
     <title>{{ $pageTitle ?? 'Multi-Module Platform' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -15,7 +16,8 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0">
+                        <div class="flex-shrink-0 flex items-center">
+                            <img src="/images/logo.png" alt="Logo" class="h-8 w-8 mr-2 rounded">
                             <span class="text-white font-bold text-xl">⚡ Platform</span>
                         </div>
                         <div class="ml-10 flex items-baseline space-x-4">

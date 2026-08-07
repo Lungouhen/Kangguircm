@@ -33,7 +33,10 @@
                 </a>
             </li>
         @empty
-            <li class="px-6 py-12 text-center text-gray-500">No posts found. Create your first post!</li>
+            <li class="px-6 py-12 text-center">
+                <img src="/images/placeholders/cms-empty.png" alt="No posts" class="mx-auto h-48 w-48 mb-4 opacity-75">
+                <p class="text-gray-500">No posts found. Create your first post!</p>
+            </li>
         @endforelse
     </ul>
 </div>

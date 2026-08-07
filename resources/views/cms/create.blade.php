@@ -51,6 +51,10 @@
                     <label for="featured_image" class="block text-sm font-medium text-gray-700">Featured Image</label>
                     <input type="file" name="featured_image" id="featured_image" accept="image/*"
                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <p class="mt-2 text-xs text-gray-500">If no image is uploaded, a default placeholder will be used.</p>
+                    <div class="mt-2">
+                        <img src="/images/placeholders/featured-image.png" alt="Default featured image" class="h-32 w-auto rounded border border-gray-200">
+                    </div>
                 </div>
             </div>
         </div>

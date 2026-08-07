@@ -63,7 +63,12 @@
                             <td class="px-6 py-4 text-sm text-gray-500">{{ date('M d, Y', strtotime($sub['subscribed_at'])) }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">No subscribers found</td></tr>
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center">
+                                <img src="/images/placeholders/email-empty.png" alt="No subscribers" class="mx-auto h-48 w-48 mb-4 opacity-75">
+                                <p class="text-gray-500">No subscribers found. Start building your email list!</p>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

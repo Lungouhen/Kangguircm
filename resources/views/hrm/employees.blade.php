@@ -32,7 +32,12 @@
                     <td class="px-6 py-4 text-sm text-gray-900 font-medium">${{ number_format((float)$emp['salary'], 2) }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">No employees found</td></tr>
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <img src="/images/placeholders/hrm-empty.png" alt="No employees" class="mx-auto h-48 w-48 mb-4 opacity-75">
+                        <p class="text-gray-500">No employees found. Add your first employee!</p>
+                    </td>
+                </tr>
             @endforelse
         </tbody>
     </table>
