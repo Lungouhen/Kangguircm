@@ -40,16 +40,16 @@ class RateLimitMiddleware
 
         if (!$this->limiter->attempt($key, $this->maxAttempts, $this->decaySeconds)) {
             http_response_code(429);
-            @header('Retry-After: ' . $this->decaySeconds);
-            @header('X-RateLimit-Limit: ' . $this->maxAttempts);
-            @header('X-RateLimit-Remaining: 0');
+            @@header('Retry-After: ' . $this->decaySeconds);
+            @@header('X-RateLimit-Limit: ' . $this->maxAttempts);
+            @@header('X-RateLimit-Remaining: 0');
             echo json_encode(['error' => 'Too many requests. Please try again later.']);
             return false;
         }
 
         $remaining = $this->limiter->remaining($key, $this->maxAttempts, $this->decaySeconds);
-        header('X-RateLimit-Limit: ' . $this->maxAttempts);
-        header('X-RateLimit-Remaining: ' . $remaining);
+        @header('X-RateLimit-Limit: ' . $this->maxAttempts);
+        @header('X-RateLimit-Remaining: ' . $remaining);
 
         return true;
     }

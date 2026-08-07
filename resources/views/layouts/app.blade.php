@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ \App\Core\Session::get('csrf_token', '') }}">
+    <meta name="description" content="{{ $metaDescription ?? 'Multi-Module Platform: CMS, Email Marketing, and HRM management system' }}">
+    <meta name="robots" content="noindex, nofollow">
     <title>{{ $pageTitle ?? 'Multi-Module Platform' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>

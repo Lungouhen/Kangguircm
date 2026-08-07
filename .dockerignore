@@ -1,0 +1,10 @@
+node_modules/
+storage/logs/*.log
+storage/cache/*.json
+database/*.sqlite
+.git/
+.env
+.cursor/
+tests/
+*.md
+tmp/

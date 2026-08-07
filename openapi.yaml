@@ -1,0 +1,312 @@
+openapi: 3.1.0
+info:
+  title: Multi-Module Platform API
+  description: |
+    Enterprise platform with CMS, Email Marketing, and HRM modules.
+    Following api-designer skill: RESTful design, consistent naming, proper HTTP semantics.
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /login:
+    get:
+      summary: Display login form
+      tags: [Auth]
+      responses:
+        '200':
+          description: Login page rendered
+    post:
+      summary: Authenticate user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email, password, csrf_token]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 6
+                csrf_token:
+                  type: string
+      responses:
+        '302':
+          description: Redirect to dashboard on success
+        '200':
+          description: Login form re-rendered on failure
+
+  /register:
+    post:
+      summary: Register new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                password_confirmation:
+                  type: string
+      responses:
+        '302':
+          description: Redirect to login on success
+
+  /dashboard:
+    get:
+      summary: Admin dashboard with statistics
+      tags: [Dashboard]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Dashboard with stats
+          content:
+            text/html:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      total_users:
+                        type: integer
+                      total_posts:
+                        type: integer
+                      total_subscribers:
+                        type: integer
+                      total_employees:
+                        type: integer
+
+  /cms:
+    get:
+      summary: List all CMS posts
+      tags: [CMS]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Post listing
+
+    post:
+      summary: Create a new post
+      tags: [CMS]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [title, content, status]
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                content:
+                  type: string
+                excerpt:
+                  type: string
+                status:
+                  type: string
+                  enum: [draft, published]
+                category_id:
+                  type: integer
+      responses:
+        '302':
+          description: Redirect to post list
+
+  /email/subscribers:
+    get:
+      summary: List email subscribers
+      tags: [Email Marketing]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Subscriber listing
+
+    post:
+      summary: Add a subscriber
+      tags: [Email Marketing]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+      responses:
+        '302':
+          description: Redirect to subscriber list
+
+  /email/campaigns:
+    get:
+      summary: List email campaigns
+      tags: [Email Marketing]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Campaign listing
+
+    post:
+      summary: Create a campaign
+      tags: [Email Marketing]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [name, subject, template]
+              properties:
+                name:
+                  type: string
+                subject:
+                  type: string
+                template:
+                  type: string
+                status:
+                  type: string
+                  enum: [draft, scheduled]
+                lists:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '302':
+          description: Redirect to campaign list
+
+  /hrm/employees:
+    get:
+      summary: List active employees
+      tags: [HRM]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Employee listing
+
+    post:
+      summary: Add a new employee
+      tags: [HRM]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [user_id, employee_code, date_of_joining, salary]
+              properties:
+                user_id:
+                  type: integer
+                employee_code:
+                  type: string
+                  minLength: 2
+                department:
+                  type: string
+                designation:
+                  type: string
+                date_of_joining:
+                  type: string
+                  format: date
+                salary:
+                  type: number
+                  minimum: 0
+      responses:
+        '302':
+          description: Redirect to employee list
+
+  /hrm/attendance:
+    get:
+      summary: Today's attendance records
+      tags: [HRM]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Attendance listing
+
+  /hrm/leaves:
+    get:
+      summary: All leave requests
+      tags: [HRM]
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Leave request listing
+
+    post:
+      summary: Submit leave request
+      tags: [HRM]
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [employee_id, leave_type, start_date, end_date, reason]
+              properties:
+                employee_id:
+                  type: integer
+                leave_type:
+                  type: string
+                  enum: [sick, casual, earned, maternity, paternity]
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                reason:
+                  type: string
+                  minLength: 10
+      responses:
+        '302':
+          description: Redirect to leave list
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: connect.sid
+      description: Express session cookie
