@@ -4,7 +4,7 @@ ob_start();
 ?>
 
 <div class="mb-6 flex justify-between items-center">
-    <p class="text-gray-600">Attendance for <?= htmlspecialchars($today) ?></p>
+    <p class="text-gray-600">Attendance for <?= esc($today) ?></p>
 </div>
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -52,10 +52,10 @@ ob_start();
                     <?php else: ?>
                         <?php foreach ($attendance as $record): ?>
                             <tr>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($record['name']) ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($record['employee_code']) ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($record['clock_in'] ?? '-') ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($record['clock_out'] ?? '-') ?></td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= esc($record['name']) ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($record['employee_code']) ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($record['clock_in'] ?? '-') ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($record['clock_out'] ?? '-') ?></td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                                         <?= match($record['status']) {
@@ -64,7 +64,7 @@ ob_start();
                                             'late' => 'bg-yellow-100 text-yellow-700',
                                             'half_day' => 'bg-blue-100 text-blue-700',
                                         } ?>">
-                                        <?= htmlspecialchars($record['status']) ?>
+                                        <?= esc($record['status']) ?>
                                     </span>
                                 </td>
                             </tr>

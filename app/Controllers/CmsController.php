@@ -123,7 +123,7 @@ class CmsController
             'content' => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
-            header("Location: /cms/{$id}/edit");
+            Response::redirect("/cms/{$id}/edit");
             exit;
         }
 

@@ -32,7 +32,7 @@ ob_start();
         </div>
     </div>
     <div class="rounded-lg bg-white shadow p-6 lg:col-span-2">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Welcome, <?= htmlspecialchars($user_name ?? 'User') ?>!</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Welcome, <?= esc($user_name ?? 'User') ?>!</h3>
         <p class="text-gray-600">Your multi-module platform is ready. Use the navigation above to access CMS, Email Marketing, and HRM modules.</p>
     </div>
 </div>

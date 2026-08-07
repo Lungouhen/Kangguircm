@@ -54,8 +54,8 @@ ob_start();
                     <?php else: ?>
                         <?php foreach ($subscribers as $sub): ?>
                             <tr>
-                                <td class="px-6 py-4 text-sm text-gray-900"><?= htmlspecialchars($sub['email']) ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($sub['name'] ?? '-') ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-900"><?= esc($sub['email']) ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($sub['name'] ?? '-') ?></td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                                         <?= match($sub['status']) {
@@ -63,7 +63,7 @@ ob_start();
                                             'unsubscribed' => 'bg-red-100 text-red-700',
                                             'bounced' => 'bg-yellow-100 text-yellow-700',
                                         } ?>">
-                                        <?= htmlspecialchars($sub['status']) ?>
+                                        <?= esc($sub['status']) ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500"><?= date('M d, Y', strtotime($sub['subscribed_at'])) ?></td>

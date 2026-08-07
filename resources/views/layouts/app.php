@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= \App\Core\Csrf::token() ?>">
-    <title><?= htmlspecialchars($pageTitle ?? 'Multi-Module Platform') ?></title>
+    <title><?= esc($pageTitle ?? 'Multi-Module Platform') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/app.css">
 </head>
@@ -37,7 +37,7 @@
         <header class="bg-white shadow">
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">
-                    <?= htmlspecialchars($pageTitle ?? 'Dashboard') ?>
+                    <?= esc($pageTitle ?? 'Dashboard') ?>
                 </h1>
             </div>
         </header>
@@ -46,13 +46,13 @@
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <?php if ($flash = \App\Core\Session::getFlash('success')): ?>
                     <div class="mb-4 rounded-md bg-green-50 p-4">
-                        <p class="text-sm text-green-700"><?= htmlspecialchars($flash) ?></p>
+                        <p class="text-sm text-green-700"><?= esc($flash) ?></p>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($error = \App\Core\Session::getFlash('error')): ?>
                     <div class="mb-4 rounded-md bg-red-50 p-4">
-                        <p class="text-sm text-red-700"><?= htmlspecialchars($error) ?></p>
+                        <p class="text-sm text-red-700"><?= esc($error) ?></p>
                     </div>
                 <?php endif; ?>
 
@@ -61,7 +61,7 @@
                         <ul class="list-disc list-inside text-sm text-red-700">
                             <?php foreach ($errors as $fieldErrors): ?>
                                 <?php foreach ((array)$fieldErrors as $error): ?>
-                                    <li><?= htmlspecialchars($error) ?></li>
+                                    <li><?= esc($error) ?></li>
                                 <?php endforeach; ?>
                             <?php endforeach; ?>
                         </ul>

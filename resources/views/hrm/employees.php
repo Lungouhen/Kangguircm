@@ -26,13 +26,13 @@ ob_start();
             <?php else: ?>
                 <?php foreach ($employees as $emp): ?>
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($emp['employee_code']) ?></td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= esc($emp['employee_code']) ?></td>
                         <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($emp['name']) ?></div>
-                            <div class="text-sm text-gray-500"><?= htmlspecialchars($emp['email']) ?></div>
+                            <div class="text-sm font-medium text-gray-900"><?= esc($emp['name']) ?></div>
+                            <div class="text-sm text-gray-500"><?= esc($emp['email']) ?></div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($emp['department'] ?? '-') ?></td>
-                        <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($emp['designation'] ?? '-') ?></td>
+                        <td class="px-6 py-4 text-sm text-gray-500"><?= esc($emp['department'] ?? '-') ?></td>
+                        <td class="px-6 py-4 text-sm text-gray-500"><?= esc($emp['designation'] ?? '-') ?></td>
                         <td class="px-6 py-4 text-sm text-gray-500"><?= date('M d, Y', strtotime($emp['date_of_joining'])) ?></td>
                         <td class="px-6 py-4 text-sm text-gray-900 font-medium">$<?= number_format((float)$emp['salary'], 2) ?></td>
                     </tr>

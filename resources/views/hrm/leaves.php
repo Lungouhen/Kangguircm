@@ -79,8 +79,8 @@ ob_start();
                     <?php else: ?>
                         <?php foreach ($leaves as $leave): ?>
                             <tr>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($leave['name']) ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($leave['leave_type']) ?></td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= esc($leave['name']) ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($leave['leave_type']) ?></td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <?= date('M d', strtotime($leave['start_date'])) ?> - <?= date('M d, Y', strtotime($leave['end_date'])) ?>
                                 </td>
@@ -92,7 +92,7 @@ ob_start();
                                             'rejected' => 'bg-red-100 text-red-700',
                                             'pending' => 'bg-yellow-100 text-yellow-700',
                                         } ?>">
-                                        <?= htmlspecialchars($leave['status']) ?>
+                                        <?= esc($leave['status']) ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -105,7 +105,7 @@ ob_start();
                                         </form>
                                     <?php else: ?>
                                         <span class="text-xs text-gray-400">
-                                            <?= $leave['approved_by_name'] ? 'By ' . htmlspecialchars($leave['approved_by_name']) : '' ?>
+                                            <?= $leave['approved_by_name'] ? 'By ' . esc($leave['approved_by_name']) : '' ?>
                                         </span>
                                     <?php endif; ?>
                                 </td>

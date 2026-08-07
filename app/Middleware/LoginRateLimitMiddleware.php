@@ -32,7 +32,7 @@ class LoginRateLimitMiddleware
 
         if (!$this->limiter->attempt($key, maxAttempts: 5, decaySeconds: 60)) {
             http_response_code(429);
-            header('Retry-After: 60');
+            @header('Retry-After: 60');
             echo json_encode(['error' => 'Too many login attempts. Please try again in 60 seconds.']);
             return false;
         }

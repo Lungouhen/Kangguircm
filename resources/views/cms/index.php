@@ -21,24 +21,24 @@ ob_start();
                         <div class="px-4 py-4 sm:px-6">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
-                                    <p class="truncate text-sm font-medium text-indigo-600"><?= htmlspecialchars($post['title']) ?></p>
+                                    <p class="truncate text-sm font-medium text-indigo-600"><?= esc($post['title']) ?></p>
                                     <span class="ml-3 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                                         <?= match($post['status']) {
                                             'published' => 'bg-green-100 text-green-700',
                                             'draft' => 'bg-yellow-100 text-yellow-700',
                                             'archived' => 'bg-gray-100 text-gray-700',
                                         } ?>">
-                                        <?= htmlspecialchars($post['status']) ?>
+                                        <?= esc($post['status']) ?>
                                     </span>
                                 </div>
                                 <div class="ml-2 flex flex-shrink-0">
-                                    <p class="text-sm text-gray-500">By <?= htmlspecialchars($post['author_name']) ?></p>
+                                    <p class="text-sm text-gray-500">By <?= esc($post['author_name']) ?></p>
                                 </div>
                             </div>
                             <div class="mt-2 sm:flex sm:justify-between">
                                 <div class="sm:flex">
                                     <p class="flex items-center text-sm text-gray-500">
-                                        /<?= htmlspecialchars($post['slug']) ?>
+                                        /<?= esc($post['slug']) ?>
                                     </p>
                                 </div>
                                 <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">

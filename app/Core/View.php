@@ -22,11 +22,27 @@ class View
             throw new \RuntimeException("View not found: {$view}");
         }
 
+        // Register escape function for views (XSS prevention)
+        $e = ['App\Helpers\Html', 'e'];
+        
         extract(array_merge(self::$shared, $data));
         
         ob_start();
         require $file;
         return ob_get_clean();
+    }
+
+    /**
+     * Escape a value for safe HTML output (XSS prevention).
+     * Shortcut for use in views: <?= View::esc($value) ?>
+     *
+     * @param mixed $value
+     * @return string
+     */
+    public static function esc(mixed $value): string
+    {
+        if ($value === null) return '';
+        return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     public static function display(string $view, array $data = []): void

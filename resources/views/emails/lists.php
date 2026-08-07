@@ -54,8 +54,8 @@ ob_start();
                     <?php else: ?>
                         <?php foreach ($lists as $list): ?>
                             <tr>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($list['name']) ?></td>
-                                <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($list['description'] ?? '-') ?></td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= esc($list['name']) ?></td>
+                                <td class="px-6 py-4 text-sm text-gray-500"><?= esc($list['description'] ?? '-') ?></td>
                                 <td class="px-6 py-4 text-sm text-gray-500"><?= (int)$list['subscriber_count'] ?></td>
                                 <td class="px-6 py-4 text-sm text-gray-500"><?= date('M d, Y', strtotime($list['created_at'])) ?></td>
                             </tr>

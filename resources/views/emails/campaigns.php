@@ -25,8 +25,8 @@ ob_start();
             <?php else: ?>
                 <?php foreach ($campaigns as $campaign): ?>
                     <tr>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= htmlspecialchars($campaign['name']) ?></td>
-                        <td class="px-6 py-4 text-sm text-gray-500"><?= htmlspecialchars($campaign['subject']) ?></td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= esc($campaign['name']) ?></td>
+                        <td class="px-6 py-4 text-sm text-gray-500"><?= esc($campaign['subject']) ?></td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                                 <?= match($campaign['status']) {
@@ -35,7 +35,7 @@ ob_start();
                                     'scheduled' => 'bg-yellow-100 text-yellow-700',
                                     'draft' => 'bg-gray-100 text-gray-700',
                                 } ?>">
-                                <?= htmlspecialchars($campaign['status']) ?>
+                                <?= esc($campaign['status']) ?>
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">

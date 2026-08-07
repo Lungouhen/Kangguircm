@@ -33,7 +33,7 @@ ob_start();
                         <label class="flex items-center">
                             <input type="checkbox" name="lists[]" value="<?= (int)$list['id'] ?>"
                                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="ml-2 text-sm text-gray-700"><?= htmlspecialchars($list['name']) ?></span>
+                            <span class="ml-2 text-sm text-gray-700"><?= esc($list['name']) ?></span>
                         </label>
                     <?php endforeach; ?>
                     <?php if (empty($lists)): ?>

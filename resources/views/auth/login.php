@@ -7,7 +7,7 @@ $pageTitle = 'Login - Multi-Module Platform';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle) ?></title>
+    <title><?= esc($pageTitle) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="h-full">
@@ -21,13 +21,13 @@ $pageTitle = 'Login - Multi-Module Platform';
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <?php if ($error = \App\Core\Session::getFlash('error')): ?>
                 <div class="mb-4 rounded-md bg-red-50 p-4">
-                    <p class="text-sm text-red-700"><?= htmlspecialchars($error) ?></p>
+                    <p class="text-sm text-red-700"><?= esc($error) ?></p>
                 </div>
             <?php endif; ?>
 
             <?php if ($success = \App\Core\Session::getFlash('success')): ?>
                 <div class="mb-4 rounded-md bg-green-50 p-4">
-                    <p class="text-sm text-green-700"><?= htmlspecialchars($success) ?></p>
+                    <p class="text-sm text-green-700"><?= esc($success) ?></p>
                 </div>
             <?php endif; ?>
 
@@ -36,7 +36,7 @@ $pageTitle = 'Login - Multi-Module Platform';
                     <ul class="list-disc list-inside text-sm text-red-700">
                         <?php foreach ($errors as $fieldErrors): ?>
                             <?php foreach ((array)$fieldErrors as $error): ?>
-                                <li><?= htmlspecialchars($error) ?></li>
+                                <li><?= esc($error) ?></li>
                             <?php endforeach; ?>
                         <?php endforeach; ?>
                     </ul>
