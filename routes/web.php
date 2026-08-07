@@ -16,6 +16,11 @@ $router->get('/register', [AuthController::class, 'showRegister']);
 $router->post('/register', [AuthController::class, 'register'], [RateLimitMiddleware::class, CsrfMiddleware::class]);
 $router->get('/logout', [AuthController::class, 'logout']);
 
+// Public blog routes (no auth required)
+$router->get('/blog', [CmsController::class, 'blog']);
+$router->get('/blog/{slug}', [CmsController::class, 'showPost']);
+$router->post('/blog/{postId}/comment', [CmsController::class, 'submitComment'], [CsrfMiddleware::class]);
+
 // Authenticated routes
 $router->group('', function(Router $router) {
 
@@ -45,11 +50,6 @@ $router->group('', function(Router $router) {
         $router->post('/comments/{id}/approve', [CmsController::class, 'approveComment'], [AuthMiddleware::class, CsrfMiddleware::class]);
         $router->post('/comments/{id}/reject', [CmsController::class, 'rejectComment'], [AuthMiddleware::class, CsrfMiddleware::class]);
     });
-
-    // Public blog routes
-    $router->get('/blog', [CmsController::class, 'blog']);
-    $router->get('/blog/{slug}', [CmsController::class, 'showPost']);
-    $router->post('/blog/{postId}/comment', [CmsController::class, 'submitComment'], [CsrfMiddleware::class]);
 
     // Email Marketing Module
     $router->group('/email', function(Router $router) {

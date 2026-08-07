@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Core\Database;
 use App\Repositories\PostRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\RevisionRepository;
@@ -18,12 +19,16 @@ use App\Repositories\CommentRepository;
  */
 class CmsService
 {
+    private Database $db;
+
     public function __construct(
         private readonly PostRepository $postRepo = new PostRepository(),
         private readonly TagRepository $tagRepo = new TagRepository(),
         private readonly RevisionRepository $revisionRepo = new RevisionRepository(),
         private readonly CommentRepository $commentRepo = new CommentRepository(),
-    ) {}
+    ) {
+        $this->db = Database::getInstance();
+    }
 
     /**
      * Create a new post with tags and initial revision.
