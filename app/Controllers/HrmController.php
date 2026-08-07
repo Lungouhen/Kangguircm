@@ -34,7 +34,7 @@ class HrmController
     public function employees(): void
     {
         $employees = $this->hrmService->getActiveEmployees();
-        View::display('hrm.employees', ['employees' => $employees]);
+        View::display('hrm.employees', ['pageTitle' => 'HRM - Employees', 'employees' => $employees]);
     }
 
     /**
@@ -42,7 +42,7 @@ class HrmController
      */
     public function createEmployee(): void
     {
-        View::display('hrm.create-employee');
+        View::display('hrm.create-employee', ['pageTitle' => 'Add Employee']);
     }
 
     /**
@@ -90,7 +90,7 @@ class HrmController
     public function attendance(): void
     {
         $attendance = $this->hrmService->getTodayAttendance();
-        View::display('hrm.attendance', [
+        View::display('hrm.attendance', ['pageTitle' => 'HRM - Attendance', 
             'attendance' => $attendance,
             'today' => date('Y-m-d'),
         ]);
@@ -122,7 +122,7 @@ class HrmController
     public function leaves(): void
     {
         $leaves = $this->hrmService->getAllLeaveRequests();
-        View::display('hrm.leaves', ['leaves' => $leaves]);
+        View::display('hrm.leaves', ['pageTitle' => 'HRM - Leaves', 'leaves' => $leaves]);
     }
 
     /**

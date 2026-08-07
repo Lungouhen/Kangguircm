@@ -42,6 +42,7 @@ class DashboardController
         ];
 
         View::display('dashboard', [
+            'pageTitle' => 'Dashboard',
             'stats' => $stats,
             'user_name' => Session::get('user_name'),
         ]);

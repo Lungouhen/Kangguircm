@@ -37,7 +37,7 @@ class EmailController
              ORDER BY subscribed_at DESC"
         );
 
-        View::display('emails.subscribers', ['subscribers' => $subscribers]);
+        View::display('emails.subscribers', ['pageTitle' => 'Email - Subscribers', 'subscribers' => $subscribers]);
     }
 
     /**
@@ -69,7 +69,7 @@ class EmailController
     public function lists(): void
     {
         $lists = $this->emailService->getListsWithCounts();
-        View::display('emails.lists', ['lists' => $lists]);
+        View::display('emails.lists', ['pageTitle' => 'Email - Lists', 'lists' => $lists]);
     }
 
     /**
@@ -104,7 +104,7 @@ class EmailController
     public function campaigns(): void
     {
         $campaigns = $this->emailService->getAllCampaigns();
-        View::display('emails.campaigns', ['campaigns' => $campaigns]);
+        View::display('emails.campaigns', ['pageTitle' => 'Email - Campaigns', 'campaigns' => $campaigns]);
     }
 
     /**
@@ -116,7 +116,7 @@ class EmailController
         $lists = $db->fetchAll("SELECT id, name FROM email_lists ORDER BY name");
         $templates = $db->fetchAll("SELECT id, name FROM email_templates ORDER BY name");
 
-        View::display('emails.create-campaign', [
+        View::display('emails.create-campaign', ['pageTitle' => 'Create Campaign', 
             'lists' => $lists,
             'templates' => $templates,
         ]);

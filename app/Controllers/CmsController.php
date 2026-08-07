@@ -38,7 +38,7 @@ class CmsController
     public function index(): void
     {
         $posts = $this->cmsService->getPostsWithAuthors();
-        View::display('cms.index', ['posts' => $posts]);
+        View::display('cms.index', ['pageTitle' => 'CMS - Posts', 'posts' => $posts]);
     }
 
     /**
@@ -50,7 +50,7 @@ class CmsController
         $categories = $db->fetchAll(
             "SELECT id, name, slug FROM cms_categories ORDER BY name"
         );
-        View::display('cms.create', ['categories' => $categories]);
+        View::display('cms.create', ['pageTitle' => 'Create Post', 'categories' => $categories]);
     }
 
     /**
@@ -107,7 +107,7 @@ class CmsController
         $categories = $db->fetchAll(
             "SELECT id, name, slug FROM cms_categories ORDER BY name"
         );
-        View::display('cms.edit', ['post' => $post, 'categories' => $categories]);
+        View::display('cms.edit', ['pageTitle' => 'Edit Post', 'post' => $post, 'categories' => $categories]);
     }
 
     /**
