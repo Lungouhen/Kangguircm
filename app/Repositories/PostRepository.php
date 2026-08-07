@@ -14,10 +14,10 @@ use App\Enums\PostStatus;
  */
 class PostRepository extends BaseRepository
 {
-    protected readonly string $table = 'cms_posts';
+    protected string $table = 'cms_posts';
 
     /** @var list<string> */
-    protected readonly array $columns = [
+    protected array $columns = [
         'id', 'title', 'slug', 'content', 'excerpt', 'featured_image',
         'author_id', 'category_id', 'status', 'published_at',
         'created_at', 'updated_at',

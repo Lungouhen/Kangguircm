@@ -4,23 +4,35 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+/**
+ * Session management.
+ *
+ * In PHP-WASM mode, sessions are managed by Node.js express-session.
+ * This class provides a compatible interface using $_SESSION superglobal.
+ */
 class Session
 {
+    private static bool $started = false;
+
+    /**
+     * Start the session (or ensure it's active).
+     */
     public static function start(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            $lifetime = (int)($_ENV['SESSION_LIFETIME'] ?? 120) * 60;
-            
-            session_set_cookie_params([
-                'lifetime' => $lifetime,
-                'path' => '/',
-                'secure' => isset($_SERVER['HTTPS']),
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
-            
-            session_start();
+        if (self::$started) return;
+
+        // In WASM mode, $_SESSION is already populated by the server wrapper
+        if (!empty($_SESSION)) {
+            self::$started = true;
+            return;
         }
+
+        // In native PHP mode, use standard session handling
+        if (php_sapi_name() !== 'cli' && session_status() === PHP_SESSION_NONE) {
+            @session_start();
+        }
+
+        self::$started = true;
     }
 
     public static function set(string $key, mixed $value): void
@@ -45,13 +57,17 @@ class Session
 
     public static function destroy(): void
     {
-        session_destroy();
         $_SESSION = [];
+        if (php_sapi_name() !== 'cli' && session_status() === PHP_SESSION_ACTIVE) {
+            @session_destroy();
+        }
     }
 
     public static function regenerate(): void
     {
-        session_regenerate_id(true);
+        if (php_sapi_name() !== 'cli' && session_status() === PHP_SESSION_ACTIVE) {
+            @session_regenerate_id(true);
+        }
     }
 
     public static function flash(string $key, mixed $value): void
@@ -64,5 +80,10 @@ class Session
         $value = $_SESSION['_flash'][$key] ?? $default;
         unset($_SESSION['_flash'][$key]);
         return $value;
+    }
+
+    public static function reset(): void
+    {
+        self::$started = false;
     }
 }

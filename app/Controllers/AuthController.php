@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Response;
 use App\Core\Session;
 use App\Core\View;
 use App\Exceptions\AuthenticationException;
@@ -46,17 +47,17 @@ class AuthController
             'password' => 'required|min:6',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /login');
+            Response::redirect('/login');
             exit;
         }
 
         try {
             $this->authService->attempt($_POST['email'], $_POST['password']);
-            header('Location: /dashboard');
+            Response::redirect('/dashboard');
             exit;
         } catch (AuthenticationException $e) {
             Session::flash('error', $e->getMessage());
-            header('Location: /login');
+            Response::redirect('/login');
             exit;
         }
     }
@@ -83,13 +84,13 @@ class AuthController
             'password' => 'required|min:8',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /register');
+            Response::redirect('/register');
             exit;
         }
 
         if ($_POST['password'] !== $_POST['password_confirmation']) {
             Session::flash('error', 'Password confirmation does not match');
-            header('Location: /register');
+            Response::redirect('/register');
             exit;
         }
 
@@ -100,7 +101,7 @@ class AuthController
         );
 
         Session::flash('success', 'Registration successful. Please login.');
-        header('Location: /login');
+        Response::redirect('/login');
         exit;
     }
 
@@ -110,7 +111,7 @@ class AuthController
     public function logout(): void
     {
         $this->authService->logout();
-        header('Location: /login');
+        Response::redirect('/login');
         exit;
     }
 }

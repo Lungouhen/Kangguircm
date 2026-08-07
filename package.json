@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@php-wasm/node": "^3.1.48",
+    "@php-wasm/universal": "^3.1.48",
+    "express": "^4.22.2",
+    "express-session": "^1.19.0",
+    "php": "^1.1.0"
+  }
+}

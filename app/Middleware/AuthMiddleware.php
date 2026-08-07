@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Core\Response;
 use App\Core\Session;
 use App\Core\Csrf;
 
@@ -15,7 +16,7 @@ class AuthMiddleware
         
         if (!Session::has('user_id')) {
             http_response_code(401);
-            header('Location: /login');
+            Response::redirect('/login');
             return false;
         }
         

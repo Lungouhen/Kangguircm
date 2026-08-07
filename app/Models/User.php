@@ -28,7 +28,7 @@ class User
 
     public function create(array $data): int
     {
-        $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
+        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
         
@@ -38,7 +38,7 @@ class User
     public function update(int $id, array $data): int
     {
         if (isset($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
+            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         }
         $data['updated_at'] = date('Y-m-d H:i:s');
         

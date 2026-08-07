@@ -11,10 +11,10 @@ namespace App\Repositories;
  */
 class EmployeeRepository extends BaseRepository
 {
-    protected readonly string $table = 'hrm_employees';
+    protected string $table = 'hrm_employees';
 
     /** @var list<string> */
-    protected readonly array $columns = [
+    protected array $columns = [
         'id', 'user_id', 'employee_code', 'department', 'designation',
         'date_of_joining', 'date_of_birth', 'phone', 'address',
         'emergency_contact', 'salary', 'bank_details', 'status',

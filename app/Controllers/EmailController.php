@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Response;
 use App\Core\Session;
 use App\Core\View;
 use App\Helpers\Validation;
@@ -49,7 +50,7 @@ class EmailController
             'email' => 'required|email|unique:email_subscribers,email',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /email/subscribers');
+            Response::redirect('/email/subscribers');
             exit;
         }
 
@@ -58,7 +59,7 @@ class EmailController
             name: $_POST['name'] ?? null,
         );
 
-        header('Location: /email/subscribers');
+        Response::redirect('/email/subscribers');
         exit;
     }
 
@@ -83,7 +84,7 @@ class EmailController
             'name' => 'required|min:2|max:255',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /email/lists');
+            Response::redirect('/email/lists');
             exit;
         }
 
@@ -93,7 +94,7 @@ class EmailController
             createdBy: (int) Session::get('user_id'),
         );
 
-        header('Location: /email/lists');
+        Response::redirect('/email/lists');
         exit;
     }
 
@@ -135,7 +136,7 @@ class EmailController
             'template' => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /email/campaigns/create');
+            Response::redirect('/email/campaigns/create');
             exit;
         }
 
@@ -152,11 +153,11 @@ class EmailController
                 createdBy: (int) Session::get('user_id'),
             );
 
-            header('Location: /email/campaigns');
+            Response::redirect('/email/campaigns');
             exit;
         } catch (\Throwable $e) {
             Session::flash('error', 'Failed to create campaign');
-            header('Location: /email/campaigns/create');
+            Response::redirect('/email/campaigns/create');
             exit;
         }
     }

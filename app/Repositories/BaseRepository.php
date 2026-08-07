@@ -19,10 +19,10 @@ abstract class BaseRepository implements RepositoryInterface
     protected readonly Database $db;
 
     /** @var string Table name */
-    protected readonly string $table;
+    protected string $table;
 
     /** @var list<string> Explicit column list (avoids SELECT *) */
-    protected readonly array $columns;
+    protected array $columns;
 
     public function __construct()
     {

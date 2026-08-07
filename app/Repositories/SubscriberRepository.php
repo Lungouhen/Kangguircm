@@ -13,10 +13,10 @@ use App\Enums\SubscriberStatus;
  */
 class SubscriberRepository extends BaseRepository
 {
-    protected readonly string $table = 'email_subscribers';
+    protected string $table = 'email_subscribers';
 
     /** @var list<string> */
-    protected readonly array $columns = [
+    protected array $columns = [
         'id', 'email', 'name', 'status',
         'subscribed_at', 'unsubscribed_at', 'confirmed_at',
     ];

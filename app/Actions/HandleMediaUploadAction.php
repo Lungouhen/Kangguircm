@@ -15,16 +15,17 @@ use App\Core\Session;
 class HandleMediaUploadAction
 {
     /** @var list<string> Allowed MIME types */
-    private readonly array $allowedMimes = [
+    private array $allowedMimes = [
         'image/jpeg',
         'image/png',
         'image/gif',
         'image/webp',
     ];
 
-    public function __construct(
-        private readonly Database $db = new (Database::class),
-    ) {}
+    public function __construct()
+    {
+        // Database is accessed via singleton
+    }
 
     /**
      * Execute the media upload action.

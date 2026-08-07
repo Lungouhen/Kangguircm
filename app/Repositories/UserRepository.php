@@ -12,10 +12,10 @@ namespace App\Repositories;
  */
 class UserRepository extends BaseRepository
 {
-    protected readonly string $table = 'users';
+    protected string $table = 'users';
 
     /** @var list<string> Safe columns (excludes password) */
-    protected readonly array $columns = [
+    protected array $columns = [
         'id', 'name', 'email', 'role_id',
         'email_verified_at', 'created_at', 'updated_at',
     ];
@@ -91,7 +91,7 @@ class UserRepository extends BaseRepository
      */
     public function create(array $data): int
     {
-        $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
+        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
 
@@ -108,7 +108,7 @@ class UserRepository extends BaseRepository
     public function update(int $id, array $data): int
     {
         if (isset($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
+            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         }
         $data['updated_at'] = date('Y-m-d H:i:s');
 

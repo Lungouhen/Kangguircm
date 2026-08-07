@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Response;
 use App\Actions\CreatePostAction;
 use App\Actions\HandleMediaUploadAction;
 use App\Core\Session;
@@ -66,7 +67,7 @@ class CmsController
             'status' => 'required|in:draft,published',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /cms/create');
+            Response::redirect('/cms/create');
             exit;
         }
 
@@ -83,7 +84,7 @@ class CmsController
             featuredImagePath: $featuredImage,
         );
 
-        header('Location: /cms');
+        Response::redirect('/cms');
         exit;
     }
 
@@ -140,7 +141,7 @@ class CmsController
 
         $this->cmsService->updatePost((int) $id, $data);
 
-        header('Location: /cms');
+        Response::redirect('/cms');
         exit;
     }
 
@@ -153,7 +154,7 @@ class CmsController
     {
         $db = \App\Core\Database::getInstance();
         $db->delete('cms_posts', 'id = ?', [(int) $id]);
-        header('Location: /cms');
+        Response::redirect('/cms');
         exit;
     }
 }

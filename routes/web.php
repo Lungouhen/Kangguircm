@@ -9,7 +9,7 @@ use App\Middleware\{AuthMiddleware, CsrfMiddleware, RateLimitMiddleware, LoginRa
 $router = new Router();
 
 // Public routes (rate-limited)
-$router->get('/', fn() => header('Location: /login'));
+$router->get('/', fn() => \App\Core\Response::redirect('/login'));
 $router->get('/login', [AuthController::class, 'showLogin']);
 $router->post('/login', [AuthController::class, 'login'], [LoginRateLimitMiddleware::class, CsrfMiddleware::class]);
 $router->get('/register', [AuthController::class, 'showRegister']);

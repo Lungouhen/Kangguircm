@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Response;
 use App\Actions\ProcessLeaveAction;
 use App\Core\Session;
 use App\Core\View;
@@ -56,7 +57,7 @@ class HrmController
             'salary' => 'required|numeric',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /hrm/employees/create');
+            Response::redirect('/hrm/employees/create');
             exit;
         }
 
@@ -74,11 +75,11 @@ class HrmController
                 'salary' => $_POST['salary'],
             ]);
 
-            header('Location: /hrm/employees');
+            Response::redirect('/hrm/employees');
             exit;
         } catch (\InvalidArgumentException $e) {
             Session::flash('error', $e->getMessage());
-            header('Location: /hrm/employees/create');
+            Response::redirect('/hrm/employees/create');
             exit;
         }
     }
@@ -105,13 +106,13 @@ class HrmController
             'employee_id' => 'required|numeric',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /hrm/attendance');
+            Response::redirect('/hrm/attendance');
             exit;
         }
 
         $this->hrmService->clockInOut((int) $_POST['employee_id']);
 
-        header('Location: /hrm/attendance');
+        Response::redirect('/hrm/attendance');
         exit;
     }
 
@@ -138,7 +139,7 @@ class HrmController
             'reason' => 'required|min:10',
         ])) {
             Session::flash('errors', $validator->errors());
-            header('Location: /hrm/leaves');
+            Response::redirect('/hrm/leaves');
             exit;
         }
 
@@ -150,7 +151,7 @@ class HrmController
             reason: $_POST['reason'],
         );
 
-        header('Location: /hrm/leaves');
+        Response::redirect('/hrm/leaves');
         exit;
     }
 
@@ -170,7 +171,7 @@ class HrmController
             approvedBy: (int) Session::get('user_id'),
         );
 
-        header('Location: /hrm/leaves');
+        Response::redirect('/hrm/leaves');
         exit;
     }
 }

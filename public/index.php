@@ -2,38 +2,72 @@
 
 declare(strict_types=1);
 
-// Front Controller - Single Entry Point
+/**
+ * Front Controller - Single Entry Point
+ */
 
-// Error reporting (controlled by environment)
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Error reporting
 $isProduction = ($_ENV['APP_ENV'] ?? 'development') === 'production';
 if (!$isProduction) {
     error_reporting(E_ALL);
-    ini_set('display_errors', '1');
+    ini_set('display_errors', '0');
 } else {
     error_reporting(0);
     ini_set('display_errors', '0');
 }
 
-// Autoloader
-require_once __DIR__ . '/../vendor/autoload.php';
+// Always output session data on shutdown (for Node.js session sync)
+register_shutdown_function(function(): void {
+    $sessionOutput = [];
+    foreach ($_SESSION as $key => $value) {
+        if ($key === 'cookie' || $key === '_csrf') continue;
+        $sessionOutput[$key] = $value;
+    }
+    echo '<!-- SESSION_DATA:' . json_encode($sessionOutput) . ':SESSION_DATA -->';
+});
 
-// Load environment
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+// Determine request details
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$uri = $_SERVER['REQUEST_URI'] ?? $_SERVER['PATH_INFO'] ?? '/';
+$uri = parse_url($uri, PHP_URL_PATH) ?: '/';
 
 // Start session
 \App\Core\Session::start();
 
-// Security headers
-\App\Helpers\Security::setCspHeaders();
+// Security headers (suppress in WASM mode)
+try {
+    \App\Helpers\Security::setCspHeaders();
+} catch (\Throwable $e) {
+    // Ignore header errors in WASM mode
+}
 
-// Database initialization
-$db = \App\Core\Database::getInstance();
+// Initialize database
+try {
+    $db = \App\Core\Database::getInstance();
+    
+    // Auto-run migrations if needed
+    $check = @$db->fetch("SELECT COUNT(*) as c FROM sqlite_master WHERE type='table' AND name='users'");
+    if (!$check || ($check['c'] ?? 0) == 0) {
+        require_once __DIR__ . '/../database/migrate.php';
+    }
+} catch (\Throwable $e) {
+    if (!empty($_ENV['APP_DEBUG'])) {
+        echo "<pre>Database Error: " . htmlspecialchars($e->getMessage()) . "</pre>";
+    }
+    exit;
+}
 
-// Load routes
-$router = require __DIR__ . '/../routes/web.php';
-
-// Dispatch request
-$method = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-$router->dispatch($method, $uri);
+// Load and dispatch routes
+try {
+    $router = require __DIR__ . '/../routes/web.php';
+    $router->dispatch($method, $uri);
+} catch (\Throwable $e) {
+    if (!empty($_ENV['APP_DEBUG'])) {
+        echo "<pre>Error: " . htmlspecialchars($e->getMessage()) . "\n" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
