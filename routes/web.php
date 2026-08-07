@@ -28,9 +28,28 @@ $router->group('', function(Router $router) {
         $router->get('/create', [CmsController::class, 'create'], [AuthMiddleware::class]);
         $router->post('/', [CmsController::class, 'store'], [AuthMiddleware::class, CsrfMiddleware::class]);
         $router->get('/{id}/edit', [CmsController::class, 'edit'], [AuthMiddleware::class]);
-        $router->put('/{id}', [CmsController::class, 'update'], [AuthMiddleware::class, CsrfMiddleware::class]);
-        $router->delete('/{id}', [CmsController::class, 'delete'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/update', [CmsController::class, 'update'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/delete', [CmsController::class, 'delete'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/submit-review', [CmsController::class, 'submitForReview'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/approve', [CmsController::class, 'approve'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/reject', [CmsController::class, 'reject'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/{id}/toggle-featured', [CmsController::class, 'toggleFeatured'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/bulk', [CmsController::class, 'bulkAction'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/restore-revision/{revisionId}', [CmsController::class, 'restoreRevision'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        // Tags management
+        $router->get('/tags', [CmsController::class, 'tags'], [AuthMiddleware::class]);
+        $router->post('/tags', [CmsController::class, 'createTag'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/tags/{id}/delete', [CmsController::class, 'deleteTag'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        // Comments moderation
+        $router->get('/comments', [CmsController::class, 'comments'], [AuthMiddleware::class]);
+        $router->post('/comments/{id}/approve', [CmsController::class, 'approveComment'], [AuthMiddleware::class, CsrfMiddleware::class]);
+        $router->post('/comments/{id}/reject', [CmsController::class, 'rejectComment'], [AuthMiddleware::class, CsrfMiddleware::class]);
     });
+
+    // Public blog routes
+    $router->get('/blog', [CmsController::class, 'blog']);
+    $router->get('/blog/{slug}', [CmsController::class, 'showPost']);
+    $router->post('/blog/{postId}/comment', [CmsController::class, 'submitComment'], [CsrfMiddleware::class]);
 
     // Email Marketing Module
     $router->group('/email', function(Router $router) {

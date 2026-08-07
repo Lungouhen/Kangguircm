@@ -470,6 +470,86 @@ class CmsService
     }
 
     /**
+     * Get featured published posts.
+     *
+     * @param int $limit
+     * @return list<array<string, mixed>>
+     */
+    public function getFeaturedPosts(int $limit = 3): array
+    {
+        return $this->postRepo->findFeatured($limit);
+    }
+
+    /**
+     * Find a post by slug for public viewing.
+     *
+     * @param string $slug
+     * @return array<string, mixed>|false
+     */
+    public function getPostBySlug(string $slug): array|false
+    {
+        $post = $this->postRepo->findBySlug($slug);
+        if ($post === false) {
+            return false;
+        }
+        $post['tags'] = $this->postRepo->getPostTags((int) $post['id']);
+        return $post;
+    }
+
+    /**
+     * Get related posts by shared tags or category.
+     *
+     * @param int $currentPostId
+     * @param int $limit
+     * @return list<array<string, mixed>>
+     */
+    public function getRelatedPosts(int $currentPostId, int $limit = 3): array
+    {
+        // Get current post's tags
+        $currentTags = $this->postRepo->getPostTags($currentPostId);
+        $tagIds = array_column($currentTags, 'id');
+
+        if (!empty($tagIds)) {
+            // Find posts with shared tags
+            $placeholders = implode(',', array_fill(0, count($tagIds), '?'));
+            return $this->db->fetchAll(
+                "SELECT DISTINCT p.id, p.title, p.slug, p.excerpt, p.published_at, p.featured_image
+                 FROM cms_posts p
+                 INNER JOIN cms_post_tags pt ON p.id = pt.post_id
+                 WHERE pt.tag_id IN ({$placeholders})
+                   AND p.id != ?
+                   AND p.status = 'published'
+                 ORDER BY p.published_at DESC
+                 LIMIT ?",
+                array_merge($tagIds, [$currentPostId, $limit])
+            );
+        }
+
+        // Fallback: posts in same category
+        $currentPost = $this->postRepo->findById($currentPostId);
+        if ($currentPost !== false && !empty($currentPost['category_id'])) {
+            return $this->db->fetchAll(
+                "SELECT id, title, slug, excerpt, published_at, featured_image
+                 FROM cms_posts
+                 WHERE category_id = ? AND id != ? AND status = 'published'
+                 ORDER BY published_at DESC
+                 LIMIT ?",
+                [$currentPost['category_id'], $currentPostId, $limit]
+            );
+        }
+
+        // Final fallback: recent published posts
+        return $this->db->fetchAll(
+            "SELECT id, title, slug, excerpt, published_at, featured_image
+             FROM cms_posts
+             WHERE id != ? AND status = 'published'
+             ORDER BY published_at DESC
+             LIMIT ?",
+            [$currentPostId, $limit]
+        );
+    }
+
+    /**
      * Get CMS dashboard statistics.
      *
      * @return array<string, mixed>
