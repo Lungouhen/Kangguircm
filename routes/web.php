@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 use App\Core\Router;
 use App\Controllers\{AuthController, DashboardController, CmsController, EmailController, HrmController};
-use App\Middleware\{AuthMiddleware, CsrfMiddleware};
+use App\Middleware\{AuthMiddleware, CsrfMiddleware, RateLimitMiddleware, LoginRateLimitMiddleware};
 
 $router = new Router();
 
-// Public routes
+// Public routes (rate-limited)
 $router->get('/', fn() => header('Location: /login'));
 $router->get('/login', [AuthController::class, 'showLogin']);
-$router->post('/login', [AuthController::class, 'login'], [CsrfMiddleware::class]);
+$router->post('/login', [AuthController::class, 'login'], [LoginRateLimitMiddleware::class, CsrfMiddleware::class]);
 $router->get('/register', [AuthController::class, 'showRegister']);
-$router->post('/register', [AuthController::class, 'register'], [CsrfMiddleware::class]);
+$router->post('/register', [AuthController::class, 'register'], [RateLimitMiddleware::class, CsrfMiddleware::class]);
 $router->get('/logout', [AuthController::class, 'logout']);
 
 // Authenticated routes

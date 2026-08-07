@@ -4,38 +4,57 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Actions\CreatePostAction;
+use App\Actions\HandleMediaUploadAction;
 use App\Core\Session;
-use App\Core\Database;
-use App\Helpers\{Validation, Security};
+use App\Core\View;
+use App\Enums\PostStatus;
+use App\Helpers\Validation;
+use App\Services\CmsService;
 
+/**
+ * CMS controller for content management operations.
+ *
+ * Delegates to CmsService for business logic and Action classes
+ * for complex multi-step workflows. Uses enums for type safety.
+ */
 class CmsController
 {
-    private Database $db;
+    /**
+     * @param CmsService $cmsService CMS business logic
+     * @param CreatePostAction $createPostAction Post creation workflow
+     * @param HandleMediaUploadAction $uploadAction Media upload workflow
+     */
+    public function __construct(
+        private readonly CmsService $cmsService = new CmsService(),
+        private readonly CreatePostAction $createPostAction = new CreatePostAction(),
+        private readonly HandleMediaUploadAction $uploadAction = new HandleMediaUploadAction(),
+    ) {}
 
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
-
+    /**
+     * Display all posts with author information.
+     */
     public function index(): void
     {
-        $posts = $this->db->fetchAll(
-            "SELECT p.*, u.name as author_name 
-             FROM cms_posts p 
-             JOIN users u ON p.author_id = u.id 
-             ORDER BY p.created_at DESC"
-        );
-
+        $posts = $this->cmsService->getPostsWithAuthors();
         View::display('cms.index', ['posts' => $posts]);
     }
 
+    /**
+     * Display the post creation form.
+     */
     public function create(): void
     {
-        $categories = $this->db->fetchAll("SELECT * FROM cms_categories ORDER BY name");
+        $db = \App\Core\Database::getInstance();
+        $categories = $db->fetchAll(
+            "SELECT id, name, slug FROM cms_categories ORDER BY name"
+        );
         View::display('cms.create', ['categories' => $categories]);
     }
 
+    /**
+     * Store a new post.
+     */
     public function store(): void
     {
         Session::start();
@@ -44,52 +63,63 @@ class CmsController
         if (!$validator->validate($_POST, [
             'title' => 'required|min:3|max:255',
             'content' => 'required',
-            'status' => 'required|in:draft,published'
+            'status' => 'required|in:draft,published',
         ])) {
             Session::flash('errors', $validator->errors());
             header('Location: /cms/create');
             exit;
         }
 
-        $slug = $this->generateSlug($_POST['title']);
-        $featuredImage = $this->handleUpload($_FILES['featured_image'] ?? null);
+        $status = PostStatus::from($_POST['status']);
+        $featuredImage = $this->uploadAction->execute($_FILES['featured_image'] ?? null);
 
-        $this->db->insert('cms_posts', [
-            'title' => $_POST['title'],
-            'slug' => $slug,
-            'content' => $_POST['content'],
-            'excerpt' => $_POST['excerpt'] ?? null,
-            'featured_image' => $featuredImage,
-            'author_id' => Session::get('user_id'),
-            'category_id' => $_POST['category_id'] ?: null,
-            'status' => $_POST['status'],
-            'published_at' => $_POST['status'] === 'published' ? date('Y-m-d H:i:s') : null
-        ]);
+        $this->createPostAction->execute(
+            title: $_POST['title'],
+            content: $_POST['content'],
+            authorId: (int) Session::get('user_id'),
+            status: $status,
+            excerpt: $_POST['excerpt'] ?? null,
+            categoryId: !empty($_POST['category_id']) ? (int) $_POST['category_id'] : null,
+            featuredImagePath: $featuredImage,
+        );
 
         header('Location: /cms');
         exit;
     }
 
+    /**
+     * Display the post editing form.
+     *
+     * @param string $id Post ID
+     */
     public function edit(string $id): void
     {
-        $post = $this->db->fetch("SELECT * FROM cms_posts WHERE id = ?", [$id]);
-        
-        if (!$post) {
+        $post = $this->cmsService->getPostWithAuthor((int) $id);
+
+        if ($post === false) {
             http_response_code(404);
             echo "Post not found";
             return;
         }
 
-        $categories = $this->db->fetchAll("SELECT * FROM cms_categories ORDER BY name");
+        $db = \App\Core\Database::getInstance();
+        $categories = $db->fetchAll(
+            "SELECT id, name, slug FROM cms_categories ORDER BY name"
+        );
         View::display('cms.edit', ['post' => $post, 'categories' => $categories]);
     }
 
+    /**
+     * Update an existing post.
+     *
+     * @param string $id Post ID
+     */
     public function update(string $id): void
     {
         $validator = new Validation();
         if (!$validator->validate($_POST, [
             'title' => 'required|min:3|max:255',
-            'content' => 'required'
+            'content' => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             header("Location: /cms/{$id}/edit");
@@ -98,81 +128,32 @@ class CmsController
 
         $data = [
             'title' => $_POST['title'],
-            'slug' => $this->generateSlug($_POST['title']),
             'content' => $_POST['content'],
             'excerpt' => $_POST['excerpt'] ?? null,
             'status' => $_POST['status'],
-            'published_at' => $_POST['status'] === 'published' ? date('Y-m-d H:i:s') : null
+            'published_at' => $_POST['status'] === 'published' ? date('Y-m-d H:i:s') : null,
         ];
 
         if (isset($_FILES['featured_image']) && $_FILES['featured_image']['error'] === UPLOAD_ERR_OK) {
-            $data['featured_image'] = $this->handleUpload($_FILES['featured_image']);
+            $data['featured_image'] = $this->uploadAction->execute($_FILES['featured_image']);
         }
 
-        $this->db->update('cms_posts', $data, 'id = ?', [$id]);
+        $this->cmsService->updatePost((int) $id, $data);
 
         header('Location: /cms');
         exit;
     }
 
+    /**
+     * Delete a post.
+     *
+     * @param string $id Post ID
+     */
     public function delete(string $id): void
     {
-        $this->db->delete('cms_posts', 'id = ?', [$id]);
+        $db = \App\Core\Database::getInstance();
+        $db->delete('cms_posts', 'id = ?', [(int) $id]);
         header('Location: /cms');
         exit;
-    }
-
-    private function generateSlug(string $title): string
-    {
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
-        $baseSlug = $slug;
-        $counter = 1;
-
-        while ($this->db->fetch("SELECT id FROM cms_posts WHERE slug = ?", [$slug])) {
-            $slug = $baseSlug . '-' . $counter++;
-        }
-
-        return $slug;
-    }
-
-    private function handleUpload(?array $file): ?string
-    {
-        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
-            return null;
-        }
-
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
-
-        if (!in_array($mimeType, $allowedMimes)) {
-            return null;
-        }
-
-        $maxSize = (int)($_ENV['MAX_UPLOAD_SIZE'] ?? 10485760);
-        if ($file['size'] > $maxSize) {
-            return null;
-        }
-
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = uniqid() . '.' . $extension;
-        $uploadPath = $_ENV['UPLOAD_PATH'] ?? 'public/uploads';
-        $destination = $uploadPath . '/' . $filename;
-
-        if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            return null;
-        }
-
-        $this->db->insert('cms_media', [
-            'filename' => $filename,
-            'original_name' => $file['name'],
-            'mime_type' => $mimeType,
-            'size' => $file['size'],
-            'path' => $destination,
-            'uploaded_by' => Session::get('user_id')
-        ]);
-
-        return $destination;
     }
 }

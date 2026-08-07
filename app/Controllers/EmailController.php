@@ -4,144 +4,157 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Core\View;
 use App\Core\Session;
-use App\Core\Database;
+use App\Core\View;
 use App\Helpers\Validation;
+use App\Services\EmailService;
 
+/**
+ * Email marketing controller.
+ *
+ * Manages subscribers, mailing lists, and campaigns.
+ * Uses EmailService for business logic delegation.
+ */
 class EmailController
 {
-    private Database $db;
+    /**
+     * @param EmailService $emailService Email business logic
+     */
+    public function __construct(
+        private readonly EmailService $emailService = new EmailService(),
+    ) {}
 
-    public function __construct()
-    {
-        $this->db = Database::getInstance();
-    }
-
+    /**
+     * Display all subscribers.
+     */
     public function subscribers(): void
     {
-        $subscribers = $this->db->fetchAll(
-            "SELECT * FROM email_subscribers ORDER BY subscribed_at DESC"
+        $db = \App\Core\Database::getInstance();
+        $subscribers = $db->fetchAll(
+            "SELECT id, email, name, status, subscribed_at
+             FROM email_subscribers
+             ORDER BY subscribed_at DESC"
         );
 
         View::display('emails.subscribers', ['subscribers' => $subscribers]);
     }
 
+    /**
+     * Add a new subscriber.
+     */
     public function addSubscriber(): void
     {
         $validator = new Validation();
         if (!$validator->validate($_POST, [
-            'email' => 'required|email|unique:email_subscribers,email'
+            'email' => 'required|email|unique:email_subscribers,email',
         ])) {
             Session::flash('errors', $validator->errors());
             header('Location: /email/subscribers');
             exit;
         }
 
-        $this->db->insert('email_subscribers', [
-            'email' => $_POST['email'],
-            'name' => $_POST['name'] ?? null,
-            'confirmation_token' => bin2hex(random_bytes(32))
-        ]);
+        $this->emailService->addSubscriber(
+            email: $_POST['email'],
+            name: $_POST['name'] ?? null,
+        );
 
         header('Location: /email/subscribers');
         exit;
     }
 
+    /**
+     * Display all mailing lists.
+     */
     public function lists(): void
     {
-        $lists = $this->db->fetchAll(
-            "SELECT l.*, COUNT(ls.subscriber_id) as subscriber_count
-             FROM email_lists l
-             LEFT JOIN email_list_subscribers ls ON l.id = ls.list_id
-             GROUP BY l.id
-             ORDER BY l.created_at DESC"
-        );
-
+        $lists = $this->emailService->getListsWithCounts();
         View::display('emails.lists', ['lists' => $lists]);
     }
 
+    /**
+     * Create a new mailing list.
+     */
     public function createList(): void
     {
+        Session::start();
+
         $validator = new Validation();
         if (!$validator->validate($_POST, [
-            'name' => 'required|min:2|max:255'
+            'name' => 'required|min:2|max:255',
         ])) {
             Session::flash('errors', $validator->errors());
             header('Location: /email/lists');
             exit;
         }
 
-        $this->db->insert('email_lists', [
-            'name' => $_POST['name'],
-            'description' => $_POST['description'] ?? null,
-            'created_by' => Session::get('user_id')
-        ]);
+        $this->emailService->createList(
+            name: $_POST['name'],
+            description: $_POST['description'] ?? null,
+            createdBy: (int) Session::get('user_id'),
+        );
 
         header('Location: /email/lists');
         exit;
     }
 
+    /**
+     * Display all campaigns.
+     */
     public function campaigns(): void
     {
-        $campaigns = $this->db->fetchAll(
-            "SELECT * FROM email_campaigns ORDER BY created_at DESC"
-        );
-
+        $campaigns = $this->emailService->getAllCampaigns();
         View::display('emails.campaigns', ['campaigns' => $campaigns]);
     }
 
+    /**
+     * Display the campaign creation form.
+     */
     public function createCampaign(): void
     {
-        $lists = $this->db->fetchAll("SELECT * FROM email_lists ORDER BY name");
-        $templates = $this->db->fetchAll("SELECT * FROM email_templates ORDER BY name");
+        $db = \App\Core\Database::getInstance();
+        $lists = $db->fetchAll("SELECT id, name FROM email_lists ORDER BY name");
+        $templates = $db->fetchAll("SELECT id, name FROM email_templates ORDER BY name");
 
         View::display('emails.create-campaign', [
             'lists' => $lists,
-            'templates' => $templates
+            'templates' => $templates,
         ]);
     }
 
+    /**
+     * Store a new campaign.
+     */
     public function storeCampaign(): void
     {
+        Session::start();
+
         $validator = new Validation();
         if (!$validator->validate($_POST, [
             'name' => 'required|min:3|max:255',
             'subject' => 'required|min:3|max:255',
-            'template' => 'required'
+            'template' => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             header('Location: /email/campaigns/create');
             exit;
         }
 
-        $this->db->beginTransaction();
-
         try {
-            $campaignId = $this->db->insert('email_campaigns', [
-                'name' => $_POST['name'],
-                'subject' => $_POST['subject'],
-                'template' => $_POST['template'],
-                'status' => $_POST['status'] ?? 'draft',
-                'scheduled_at' => $_POST['scheduled_at'] ?? null,
-                'created_by' => Session::get('user_id')
-            ]);
+            $this->emailService->createCampaign(
+                data: [
+                    'name' => $_POST['name'],
+                    'subject' => $_POST['subject'],
+                    'template' => $_POST['template'],
+                    'status' => $_POST['status'] ?? 'draft',
+                    'scheduled_at' => $_POST['scheduled_at'] ?? null,
+                ],
+                listIds: array_map('intval', $_POST['lists'] ?? []),
+                createdBy: (int) Session::get('user_id'),
+            );
 
-            if (!empty($_POST['lists'])) {
-                foreach ($_POST['lists'] as $listId) {
-                    $this->db->insert('email_campaign_lists', [
-                        'campaign_id' => $campaignId,
-                        'list_id' => $listId
-                    ]);
-                }
-            }
-
-            $this->db->commit();
             header('Location: /email/campaigns');
             exit;
-
-        } catch (\Exception $e) {
-            $this->db->rollBack();
+        } catch (\Throwable $e) {
             Session::flash('error', 'Failed to create campaign');
             header('Location: /email/campaigns/create');
             exit;
