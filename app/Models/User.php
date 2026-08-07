@@ -18,12 +18,12 @@ class User
 
     public function findById(int $id): array|false
     {
-        return $this->db->fetch("SELECT * FROM {$this->table} WHERE id = ?", [$id]);
+        return $this->db->fetch("SELECT id, name, email, role_id, created_at, updated_at FROM {$this->table} WHERE id = ?", [$id]);
     }
 
     public function findByEmail(string $email): array|false
     {
-        return $this->db->fetch("SELECT * FROM {$this->table} WHERE email = ?", [$email]);
+        return $this->db->fetch("SELECT id, name, email, password, role_id, created_at FROM {$this->table} WHERE email = ?", [$email]);
     }
 
     public function create(array $data): int

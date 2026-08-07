@@ -18,12 +18,12 @@ class Role
 
     public function findById(int $id): array|false
     {
-        return $this->db->fetch("SELECT * FROM {$this->table} WHERE id = ?", [$id]);
+        return $this->db->fetch("SELECT id, name, description, permissions, created_at FROM {$this->table} WHERE id = ?", [$id]);
     }
 
     public function findByName(string $name): array|false
     {
-        return $this->db->fetch("SELECT * FROM {$this->table} WHERE name = ?", [$name]);
+        return $this->db->fetch("SELECT id, name, description, permissions, created_at FROM {$this->table} WHERE name = ?", [$name]);
     }
 
     public function create(array $data): int
@@ -45,7 +45,7 @@ class Role
 
     public function getAll(): array
     {
-        return $this->db->fetchAll("SELECT * FROM {$this->table} ORDER BY name");
+        return $this->db->fetchAll("SELECT id, name, description, permissions, created_at FROM {$this->table} ORDER BY name");
     }
 
     public function getPermissions(int $roleId): array
