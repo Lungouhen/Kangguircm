@@ -127,8 +127,12 @@ class Blade
         $source = file_get_contents($filePath);
         $compiled = self::compile($source);
 
-        // Write to temp file for execution (allows proper error reporting)
-        $tmpFile = sys_get_temp_dir() . '/blade_' . md5($filePath . $compiled) . '.php';
+        // Write to project-local temp file for execution (WASM can access these)
+        $tmpDir = dirname(__DIR__, 2) . '/storage/cache/blade';
+        if (!is_dir($tmpDir)) {
+            @mkdir($tmpDir, 0755, true);
+        }
+        $tmpFile = $tmpDir . '/' . md5($filePath . $compiled) . '.php';
 
         if (!file_exists($tmpFile) || filemtime($tmpFile) < filemtime($filePath)) {
             file_put_contents($tmpFile, $compiled);
@@ -148,14 +152,20 @@ class Blade
     {
         $compiled = $source;
 
+        // === Remove comments first (before echo compilation) ===
+        $compiled = self::compileComments($compiled);
+
         // === Layout directives ===
         $compiled = self::compileExtends($compiled);
         $compiled = self::compileSections($compiled);
         $compiled = self::compileYields($compiled);
 
-        // === Echo statements (MUST be before general PHP compilation) ===
-        $compiled = self::compileEchoRaw($compiled);    // {!! $var !!}
-        $compiled = self::compileEchoEscaped($compiled); // {{ $var }}
+        // === Raw PHP blocks ===
+        $compiled = self::compilePhpBlocks($compiled);
+
+        // === Echo statements ===
+        $compiled = self::compileEchoRaw($compiled);
+        $compiled = self::compileEchoEscaped($compiled);
 
         // === Control structures ===
         $compiled = self::compileConditionals($compiled);
@@ -171,6 +181,23 @@ class Blade
         $compiled = self::compileAuth($compiled);
 
         return $compiled;
+    }
+
+    /**
+     * Compile {{-- comments --}} (remove them).
+     */
+    private static function compileComments(string $source): string
+    {
+        return preg_replace('/\{\{--.*?--\}\}/s', '', $source);
+    }
+
+    /**
+     * Compile @php ... @endphp blocks.
+     */
+    private static function compilePhpBlocks(string $source): string
+    {
+        $source = preg_replace('/@php\s*(.*?)\s*@endphp/s', '<?php $1 ?>', $source);
+        return $source;
     }
 
     // ─── Layout Compilation ──────────────────────────────────────────
@@ -246,9 +273,16 @@ class Blade
      */
     private static function compileEchoEscaped(string $source): string
     {
-        return preg_replace(
+        // If expression already has null coalescing, don't add extra ??
+        return preg_replace_callback(
             '/\{\{\s*(.+?)\s*\}\}/',
-            '<?php echo htmlspecialchars((string)($1 ?? \'\'), ENT_QUOTES, \'UTF-8\'); ?>',
+            function ($m) {
+                $expr = trim($m[1]);
+                if (str_contains($expr, '??')) {
+                    return '<?php echo htmlspecialchars((string)(' . $expr . '), ENT_QUOTES, \'UTF-8\'); ?>';
+                }
+                return '<?php echo htmlspecialchars((string)(' . $expr . ' ?? \'\'), ENT_QUOTES, \'UTF-8\'); ?>';
+            },
             $source
         );
     }
@@ -367,6 +401,22 @@ class Blade
      */
     private static function compileForeach(string $source): string
     {
+        // @forelse($items as $item) ... @empty ... @endforelse
+        $source = preg_replace_callback(
+            '/@forelse\s*\(\s*([^)]+)\s+as\s+([^)]+)\s*\)(.*?)@empty(.*?)@endforelse/s',
+            function ($m) {
+                return '<?php $__forelseData = ' . trim($m[1]) . '; '
+                    . 'if(!empty($__forelseData)): '
+                    . '$__loopIndex = 0; $__loopCount = is_countable($__forelseData) ? count($__forelseData) : 0; '
+                    . 'foreach($__forelseData as ' . trim($m[2]) . '): '
+                    . '$loop = (object)[\'index\' => $__loopIndex, \'iteration\' => $__loopIndex + 1, \'first\' => $__loopIndex === 0, \'last\' => $__loopIndex === $__loopCount - 1, \'count\' => $__loopCount]; ?>'
+                    . $m[3]
+                    . '<?php $__loopIndex++; endforeach; else: ?>'
+                    . $m[4]
+                    . '<?php endif; ?>';
+            },
+            $source
+        );
         $result = '';
         $len = strlen($source);
         $directive = '@foreach';

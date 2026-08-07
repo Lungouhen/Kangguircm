@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    @foreach($roles as $role)
+@foreach($roles as $role)
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border-l-4
         @if($role['name'] === 'admin') border-purple-500
         @elseif($role['name'] === 'editor') border-blue-500
@@ -17,17 +17,17 @@
         <div>
             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Permissions:</p>
             <div class="flex flex-wrap gap-1">
-                @php $permissions = json_decode($role['permissions'] ?? '[]', true) ?: []; @endphp
-                @foreach($permissions as $perm)
+                @php $rolePerms = json_decode($role['permissions'] ?? '[]', true); if (!is_array($rolePerms)) $rolePerms = []; @endphp
+                @foreach($rolePerms as $perm)
                     <span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">{{ $perm }}</span>
                 @endforeach
-                @if(empty($permissions))
+                @if(empty($rolePerms))
                     <span class="text-xs text-gray-400">None</span>
                 @endif
             </div>
         </div>
     </div>
-    @endforeach
+@endforeach
 </div>
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -44,7 +44,13 @@
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 @php
-                    $allPerms = collect($roles)->flatMap(fn($r) => json_decode($r['permissions'] ?? '[]', true) ?: [])->unique()->sort()->values()->all();
+                    $allPerms = [];
+                    foreach($roles as $r) {
+                        $p = json_decode($r['permissions'] ?? '[]', true);
+                        if (is_array($p)) $allPerms = array_merge($allPerms, $p);
+                    }
+                    $allPerms = array_values(array_unique($allPerms));
+                    sort($allPerms);
                 @endphp
                 @foreach($allPerms as $perm)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">

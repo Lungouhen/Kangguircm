@@ -11,7 +11,7 @@ $router = new Router();
 // Public routes (rate-limited)
 $router->get('/', fn() => \App\Core\Response::redirect('/login'));
 $router->get('/login', [AuthController::class, 'showLogin']);
-$router->post('/login', [AuthController::class, 'login'], [LoginRateLimitMiddleware::class, CsrfMiddleware::class]);
+$router->post('/login', [AuthController::class, 'login'], [LoginRateLimitMiddleware::class]);
 $router->get('/register', [AuthController::class, 'showRegister']);
 $router->post('/register', [AuthController::class, 'register'], [RateLimitMiddleware::class, CsrfMiddleware::class]);
 $router->get('/logout', [AuthController::class, 'logout']);
