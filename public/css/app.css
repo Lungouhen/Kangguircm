@@ -1,0 +1,37 @@
+/* Custom Application Styles */
+
+/* Smooth transitions */
+a, button, input, select, textarea {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Form focus states */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    ring: 2px;
+}
+
+/* Card hover effects */
+.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
+}
+
+/* Table responsiveness */
+@media (max-width: 640px) {
+    table {
+        font-size: 0.875rem;
+    }
+    th, td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    nav, .no-print {
+        display: none !important;
+    }
+    main {
+        padding: 0 !important;
+    }
+}
