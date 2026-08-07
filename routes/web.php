@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Core\Router;
-use App\Controllers\{AuthController, DashboardController, CmsController, EmailController, HrmController};
-use App\Middleware\{AuthMiddleware, CsrfMiddleware, RateLimitMiddleware, LoginRateLimitMiddleware};
+use App\Controllers\{AuthController, DashboardController, CmsController, EmailController, HrmController, AdminController};
+use App\Middleware\{AuthMiddleware, AdminMiddleware, CsrfMiddleware, RateLimitMiddleware, LoginRateLimitMiddleware};
 
 $router = new Router();
 
@@ -54,6 +54,16 @@ $router->group('', function(Router $router) {
         $router->post('/leaves', [HrmController::class, 'requestLeave'], [AuthMiddleware::class, CsrfMiddleware::class]);
         $router->post('/leaves/{id}/approve', [HrmController::class, 'approveLeave'], [AuthMiddleware::class, CsrfMiddleware::class]);
     });
+
+    // Admin Panel (admin role only)
+    $router->group('/admin', function(Router $router) {
+        $router->get('/', [AdminController::class, 'dashboard']);
+        $router->get('/users', [AdminController::class, 'users']);
+        $router->get('/roles', [AdminController::class, 'roles']);
+        $router->get('/settings', [AdminController::class, 'settings']);
+        $router->post('/settings/update', [AdminController::class, 'updateSetting'], [CsrfMiddleware::class]);
+        $router->get('/logs', [AdminController::class, 'logs']);
+    }, [AdminMiddleware::class]);
 
 }, [AuthMiddleware::class]);
 
